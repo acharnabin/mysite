@@ -1,60 +1,141 @@
-import React,{useEffect} from 'react'
-import Aos from 'aos';
-import 'aos/dist/aos.css';
-import Navbar from './components/Navbar'
-import './App.css'
-import Hero from './components/Hero'
-import Project from './components/Project'
-import Skills from './components/Skills'
-import my_photo from './assets/my_photo.png'
+import { Paper, IconButton, TextField } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/mode-html";
+import "ace-builds/src-noconflict/theme-github";
+import {
+  IoCloudDownloadSharp,
+  IoTerminalOutline,
+  IoSunnyOutline,
+  IoMoonOutline,
+  IoPlayCircleOutline,
+} from "react-icons/io5";
+import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds";
 const App = () => {
-    useEffect(() => {
-        Aos.init({duration:1000})
-      }, [])
-    return (
-        <div className="app shadow">
-        <div className="">
-            
-        <div className="app_content ">
-            <div className="row container-fluid app_content_hero">
-            <Navbar/>
-                <Hero/>
-            </div>
+  const [darkmode, setdarkmode] = useState(false);
+  const [html, sethtml] = useState("");
+  const [htmlsrc, sethtmlsrc] = useState("");
+  const [theme, setTheme] = useState("github");
 
-            <div className="row  app_content_project container-fluid">
-            <h1 className="text-center">Portfolio</h1>
-            <h5 className="text-center">Check out my portfolio to see some of my recent personal work.</h5>
-            <div className="project_items">
-                <Project/>
-                </div>
-            </div>
+  function handleDarkmode() {
+    setdarkmode(!darkmode);
+  }
+  function onhtmlChange(newValue) {
+    sethtml(newValue);
+  }
 
-            <div className="row  app_content_skill container-fluid ">
-                <Skills/>
-            </div>
+  function onThemeChange() {
+    const x = darkmode ? "monokai" : "github";
+    setTheme(x);
+  }
 
-            <div className="row  app_content_about container-fluid ">
-                <div className="about_info row container">
-                    <div className="col-xs-8 col-md-8 col-sm-12 col-sm-order-1 order-2 about_text" >
-                        <h1 data-aos="fade-up">About Me</h1>
-                        <h5 data-aos="fade-down">I am <span className="bold">Nabin Achar</span>,3rd year student of computer science and technology, central calcutta polytechnic.I love web development and competitve programming.I am a person who is positive about every aspect of life. There are many things I like to do, to see, and to experience. I like to read, I like to write; I like to think, I like to dream; I like to talk, I like to listen.</h5>
-                    </div>
-                    <div className="col-xs-4 col-md-4 col-sm-12 col-sm-order-2 order-1 about_img" data-aos="fade-up">
-                        <img src={my_photo} alt=""/>
-                    </div>
-                </div>
-            </div>
+  function download() {
+    if (html) {
+      const element = document.createElement("a");
+      const file = new Blob([htmlsrc], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = "index.txt";
+      element.click();
+    } else {
+      alert("write something to download");
+    }
+  }
 
-            <div className="app_footer">
-                
+  function runCode() {
+    sethtmlsrc(`
+    <html>
+      ${html}
+    </html>`);
+  }
+
+  useEffect(() => {
+    onThemeChange();
+  }, [darkmode]);
+  return (
+    <div className="app">
+      <div className="editor_container">
+        <Paper className="editor">
+          <div
+            className={
+              darkmode
+                ? "editor_top editor_top_dark"
+                : "editor_top editor_top_light"
+            }
+          >
+            <div
+              style={{
+                display: "flex",
+              }}
+            >
+              <span style={{ margin: "0px 2px" }}>
+                <IoTerminalOutline className="icon_btn" />
+              </span>
+              <h5 style={{ margin: "0px 2px" }}>Html</h5>
             </div>
+            <div className="icons">
+              <IconButton onClick={runCode}>
+                <IoPlayCircleOutline className="icon_btn" />
+              </IconButton>
+
+              <IconButton onClick={download}>
+                <IoCloudDownloadSharp className="icon_btn" />
+              </IconButton>
+
+              <IconButton onClick={handleDarkmode}>
+                {darkmode ? (
+                  <IoSunnyOutline className="icon_btn" />
+                ) : (
+                  <IoMoonOutline className="icon_btn" />
+                )}
+              </IconButton>
+            </div>
+          </div>
+          <AceEditor
+            style={{
+              width: "100%",
+              minHeight: "100vh",
+            }}
+            mode="html"
+            theme={theme}
+            fontSize={14}
+            onChange={onhtmlChange}
+            name="UNIQUE_ID_OF_DIV"
+            editorProps={{ $blockScrolling: true }}
+            showPrintMargin={true}
+            showGutter={true}
+            highlightActiveLine={true}
+            setOptions={{
+              enableBasicAutocompletion: true,
+              enableLiveAutocompletion: true,
+              enableSnippets: true,
+              showLineNumbers: true,
+              tabSize: 2,
+            }}
+          />
+        </Paper>
+      </div>
+      <div
+        className={
+          darkmode
+            ? "iframe_container iframe_container_dark"
+            : "iframe_container iframe_container_light"
+        }
+      >
+        <div
+          className={
+            darkmode
+              ? "iframe_top iframe_top_dark"
+              : "iframe_top iframe_top_light"
+          }
+        >
+          <h5>output</h5>
         </div>
-        </div>
-           
-        
-            
-        </div>
-    )
-}
+        <iframe title="output" srcDoc={htmlsrc} />
+      </div>
+    </div>
+  );
+};
 
-export default App
+export default App;
